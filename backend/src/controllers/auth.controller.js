@@ -10,8 +10,8 @@ export const signup = async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
-  if(username.length<=3){
-        return res.status(400).json({ message: "username should be 3 or more than 3 chracters" });
+  if(username.length<3){
+        return res.status(400).json({ message: "Username should be atleast 3 characters" });
   }
 
   if (!emailRegex.test(email)) {
@@ -19,7 +19,7 @@ export const signup = async (req, res) => {
   }
 
   if (password.length < 6) {
-    return res.status(400).json({ message: "Password must be at least 6 chars" });
+    return res.status(400).json({ message: "Password must be at least 6 digits" });
   }
 
   try {
@@ -50,6 +50,9 @@ export const signin = async (req, res) => {
   if (!emailRegex.test(email)) {
     return res.status(400).json({ message: "Invalid email format" });
   }
+  if (password.length<6) {
+    return res.status(400).json({ message: "Password must be 6 characters" });
+  }
 
   try {
     const [rows] = await getUserByEmail(email);
@@ -75,6 +78,11 @@ export const signin = async (req, res) => {
   })
   .json({
     message: "Login successful",
+    user: {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+  },
   });
 
   } catch (err) {
@@ -91,4 +99,29 @@ export const logout = (req, res) => {
       secure: false, 
     })
     .json({ message: "Logout successful" });
+};
+
+
+export const checkAuth = async (req, res) => {
+  try {
+    const [rows] = await getUserById(req.userId);
+
+    if (rows.length === 0) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user = rows[0];
+
+    res.status(200).json({
+      message: "Authenticated",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Auth check failed" });
+  }
 };

@@ -6,9 +6,11 @@ import SocialButton from "../components/ui/SocialButton";
 import { BackgroundBlobs, FloatingElements, GridPattern } from "../components/ui/Decorations";
 import Input from "../components/ui/Input";
 
-const Login = ({error,loading}) => {
+const Login = () => {
   const {
     form,
+    loading,
+    error,
     handleEmailChange,
     handlePasswordChange,
     handleSubmit,

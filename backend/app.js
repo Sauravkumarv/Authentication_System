@@ -3,10 +3,13 @@ import "dotenv/config"
 import  {dbConnect, pool} from "./src/config/db.js";
 import router from "./src/routes/auth.routes.js";
 import cors from "cors"
+import cookieParser from "cookie-parser"
 
 const app = express();
 
 await dbConnect();
+app.use(cookieParser());
+
 app.use(cors({
   origin:process.env.FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE"],

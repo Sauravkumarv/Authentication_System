@@ -4,7 +4,6 @@ import { useAuth } from "./AuthContext";
 const ProtectedRoute = ({ children }) => {
   const { isAuth } = useAuth();
 
-  // 👇 token present hai but state update pending hai
   const token = localStorage.getItem("token");
 
   if (!isAuth && !token) {

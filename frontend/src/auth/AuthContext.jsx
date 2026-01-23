@@ -1,37 +1,52 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import * as authService from "../services/uth.service.js";
+import * as authService from "../services/auth.service.js";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // app reload pe token check
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) setIsAuth(true);
+    authService
+      .checkAuth()
+      .then((res) => {
+        setIsAuth(true);
+        setUser(res.data.user);
+      })
+      .catch(() => {
+        setIsAuth(false);
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = async (data) => {
     const res = await authService.login(data);
+    if (res.data?.message === "Login successful") {
+      setIsAuth(true);
+      setUser(res.data.user);
+    }
+    return res.data;
+  };
 
-    // axios => res.data
-    const result = res.data;
+  const logout = async () => {
+    await authService.logout();
+    setIsAuth(false);
+    setUser(null);
+  };
 
-    if (result?.message === "Login successful") {
-    setIsAuth(true); // 🔥 cookie already browser me hai
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white bg-slate-900">
+        Loading...
+      </div>
+    );
   }
 
-  return result;
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setIsAuth(false);
-  };
-
   return (
-    <AuthContext.Provider value={{ isAuth, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuth, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
